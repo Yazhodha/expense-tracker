@@ -163,7 +163,7 @@ A modern expense tracking application to manage credit card expenses within a Rs
 
 ### Phase 4: Firebase Integration & Data Hooks - COMPLETE ✅
 **Date:** Dec 20, 2025
-**Commit:** (pending)
+**Commit:** `3c49586` - Implement Phase 4: Firebase Integration & Data Hooks
 
 **Implemented:**
 1. **Firestore Functions** ([src/lib/firebase/firestore.ts](src/lib/firebase/firestore.ts))
