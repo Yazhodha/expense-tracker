@@ -2,16 +2,19 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { format } from 'date-fns';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Category } from '@/lib/types';
-import { Plus, Check } from 'lucide-react';
+import { Plus, Check, Calendar as CalendarIcon } from 'lucide-react';
 import * as Icons from 'lucide-react';
 
 interface AddExpenseSheetProps {
   categories: Category[];
-  onAdd: (expense: { amount: number; category: string; merchant?: string; note?: string }) => Promise<void>;
+  onAdd: (expense: { amount: number; category: string; merchant?: string; note?: string; date?: Date }) => Promise<void>;
   currency?: string;
 }
 
@@ -20,23 +23,29 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
   const [amount, setAmount] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [merchant, setMerchant] = useState('');
+  const [note, setNote] = useState('');
+  const [date, setDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!amount || !selectedCategory) return;
+    if (!amount || !selectedCategory || !merchant) return;
 
     setLoading(true);
     try {
       await onAdd({
         amount: Number(amount),
         category: selectedCategory,
-        merchant: merchant || undefined,
+        merchant: merchant,
+        note: note || undefined,
+        date: date,
       });
 
       // Reset form
       setAmount('');
       setSelectedCategory(null);
       setMerchant('');
+      setNote('');
+      setDate(new Date());
       setOpen(false);
     } finally {
       setLoading(false);
@@ -56,13 +65,16 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
 
       <SheetContent
         side="bottom"
-        className="h-[85vh] rounded-t-3xl !left-1/2 !right-auto !-translate-x-1/2 w-full max-w-md data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom"
+        className="h-[85vh] rounded-t-3xl !left-1/2 !right-auto !-translate-x-1/2 w-full max-w-md data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom flex flex-col"
       >
-          <SheetHeader className="text-left">
+          <SheetHeader className="text-left flex-shrink-0">
             <SheetTitle>Add Expense</SheetTitle>
+            <SheetDescription className="sr-only">
+              Enter the amount, select a category, add a merchant name, optionally add a note and choose a date for this expense.
+            </SheetDescription>
           </SheetHeader>
 
-          <div className="mt-6 space-y-6">
+          <div className="mt-6 space-y-6 overflow-y-auto flex-1 pr-2">
           {/* Amount input */}
           <div className="text-center">
             <span className="text-2xl text-muted-foreground">{currency}</span>
@@ -102,9 +114,39 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
             </div>
           </div>
 
-          {/* Merchant (optional) */}
+          {/* Date picker */}
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Merchant (optional)</p>
+            <p className="text-sm text-muted-foreground mb-2">Date</p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(date, 'PPP')}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(newDate) => {
+                    if (newDate) {
+                      // Preserve current time, only update the date portion
+                      const updatedDate = new Date(date);
+                      updatedDate.setFullYear(newDate.getFullYear(), newDate.getMonth(), newDate.getDate());
+                      setDate(updatedDate);
+                    }
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Merchant (required) */}
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">Merchant</p>
             <Input
               value={merchant}
               onChange={(e) => setMerchant(e.target.value)}
@@ -112,11 +154,21 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
             />
           </div>
 
+          {/* Note (optional) */}
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">Note (optional)</p>
+            <Input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Add a note about this expense"
+            />
+          </div>
+
           {/* Submit button */}
           <Button
             className="w-full h-12"
             size="lg"
-            disabled={!amount || !selectedCategory || loading}
+            disabled={!amount || !selectedCategory || !merchant || loading}
             onClick={handleSubmit}
           >
             {loading ? (

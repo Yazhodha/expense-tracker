@@ -48,37 +48,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        // Get or create user document
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+      try {
+        if (firebaseUser) {
+          // Get or create user document
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
 
-        if (userDoc.exists()) {
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email || '',
-            displayName: firebaseUser.displayName || '',
-            photoURL: firebaseUser.photoURL || '',
-            settings: userDoc.data().settings,
-          });
+          if (userDoc.exists()) {
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              displayName: firebaseUser.displayName || '',
+              photoURL: firebaseUser.photoURL || '',
+              settings: userDoc.data().settings,
+            });
+          } else {
+            // First time user - create document with defaults
+            const newUser: User = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              displayName: firebaseUser.displayName || '',
+              photoURL: firebaseUser.photoURL || '',
+              settings: DEFAULT_SETTINGS,
+            };
+            await setDoc(doc(db, 'users', firebaseUser.uid), {
+              settings: DEFAULT_SETTINGS,
+              createdAt: new Date(),
+            });
+            setUser(newUser);
+          }
         } else {
-          // First time user - create document with defaults
-          const newUser: User = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email || '',
-            displayName: firebaseUser.displayName || '',
-            photoURL: firebaseUser.photoURL || '',
-            settings: DEFAULT_SETTINGS,
-          };
-          await setDoc(doc(db, 'users', firebaseUser.uid), {
-            settings: DEFAULT_SETTINGS,
-            createdAt: new Date(),
-          });
-          setUser(newUser);
+          setUser(null);
         }
-      } else {
+      } catch (error) {
+        console.error('Auth state change error:', error);
+        // If there's an error fetching user data, still set loading to false
+        // but keep user as null to redirect to login
         setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();

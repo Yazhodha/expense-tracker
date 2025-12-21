@@ -1,90 +1,68 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { useExpenses } from '@/lib/hooks/useExpenses';
 import { BudgetCard } from '@/components/dashboard/BudgetCard';
 import { ExpenseList } from '@/components/dashboard/ExpenseList';
 import { AddExpenseSheet } from '@/components/expense/AddExpenseSheet';
-import { getBillingCycle } from '@/lib/utils/dates';
-import { BudgetSummary, Expense } from '@/lib/types';
+import { EditExpenseSheet } from '@/components/expense/EditExpenseSheet';
+import { Expense } from '@/lib/types';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-
-  // Mock expenses for testing
-  const mockExpenses: Expense[] = useMemo(() => [
-    {
-      id: '1',
-      userId: user?.uid || '',
-      amount: 2500,
-      category: 'groceries',
-      merchant: 'Keells Supermarket',
-      note: 'Weekly groceries',
-      date: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      source: 'manual',
-    },
-    {
-      id: '2',
-      userId: user?.uid || '',
-      amount: 1200,
-      category: 'dining',
-      merchant: 'Pizza Hut',
-      date: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      source: 'manual',
-    },
-    {
-      id: '3',
-      userId: user?.uid || '',
-      amount: 3000,
-      category: 'fuel',
-      merchant: 'Ceylon Petroleum',
-      date: new Date(Date.now() - 86400000), // Yesterday
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      source: 'manual',
-    },
-  ], [user?.uid]);
-
-  // Calculate budget summary
-  const summary: BudgetSummary = useMemo(() => {
-    const billingDate = user?.settings.billingDate || 15;
-    const cycle = getBillingCycle(billingDate);
-    const spent = mockExpenses.reduce((sum, e) => sum + e.amount, 0);
-    const limit = user?.settings.monthlyLimit || 100000;
-    const remaining = limit - spent;
-    const percentUsed = (spent / limit) * 100;
-    const dailyBudget = cycle.daysRemaining > 0 ? Math.floor(remaining / cycle.daysRemaining) : 0;
-
-    return {
-      cycle,
-      spent,
-      limit,
-      remaining,
-      percentUsed,
-      dailyBudget,
-      todaySpent: mockExpenses
-        .filter((e) => e.date.toDateString() === new Date().toDateString())
-        .reduce((sum, e) => sum + e.amount, 0),
-      isOverBudget: remaining < 0,
-    };
-  }, [user, mockExpenses]);
+  const { expenses, loading, summary, addExpense, updateExpense, deleteExpense } = useExpenses();
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
   const handleAddExpense = async (expense: {
     amount: number;
     category: string;
     merchant?: string;
+    note?: string;
+    date?: Date;
   }) => {
-    // TODO: In Phase 4, we'll add real Firebase integration
-    console.log('Add expense:', expense);
-    alert(`Expense added! (Phase 4 will save to Firebase)\nAmount: Rs. ${expense.amount}\nCategory: ${expense.category}`);
+    try {
+      await addExpense({
+        ...expense,
+        date: expense.date || new Date(),
+        source: 'manual',
+      });
+      toast.success('Expense added successfully');
+    } catch (error) {
+      console.error('Error adding expense:', error);
+      toast.error('Failed to add expense. Please try again.');
+    }
+  };
+
+  const handleUpdateExpense = async (expenseId: string, updates: Partial<Expense>) => {
+    try {
+      await updateExpense(expenseId, updates);
+    } catch (error) {
+      console.error('Error updating expense:', error);
+      toast.error('Failed to update expense. Please try again.');
+    }
+  };
+
+  const handleDeleteExpense = async (expenseId: string) => {
+    try {
+      await deleteExpense(expenseId);
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      toast.error('Failed to delete expense. Please try again.');
+    }
   };
 
   if (!user) return null;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -99,9 +77,10 @@ export default function DashboardPage() {
       <div>
         <h2 className="font-semibold mb-4">Recent Expenses</h2>
         <ExpenseList
-          expenses={mockExpenses}
+          expenses={expenses}
           categories={user.settings.categories}
           currency={user.settings.currency}
+          onEditExpense={setEditingExpense}
         />
       </div>
 
@@ -110,6 +89,17 @@ export default function DashboardPage() {
         categories={user.settings.categories}
         currency={user.settings.currency}
         onAdd={handleAddExpense}
+      />
+
+      {/* Edit Expense Sheet */}
+      <EditExpenseSheet
+        expense={editingExpense}
+        categories={user.settings.categories}
+        currency={user.settings.currency}
+        open={editingExpense !== null}
+        onOpenChange={(open) => !open && setEditingExpense(null)}
+        onUpdate={handleUpdateExpense}
+        onDelete={handleDeleteExpense}
       />
     </motion.div>
   );

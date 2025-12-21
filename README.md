@@ -18,12 +18,26 @@ A modern expense tracking application built with Next.js, Firebase, and Tailwind
 - ✅ Login page with animations
 - ✅ Protected dashboard layout
 
+### Phase 3: Core UI Components - **COMPLETE**
+- ✅ BudgetRing (animated circular progress)
+- ✅ BudgetCard with cycle info
+- ✅ ExpenseList with date grouping
+- ✅ ExpenseItem component
+- ✅ AddExpenseSheet (bottom drawer)
+
+### Phase 4: Firebase Integration & Data Hooks - **COMPLETE**
+- ✅ Firestore CRUD functions
+- ✅ Real-time expense subscription
+- ✅ useExpenses hook
+- ✅ Budget calculations
+- ✅ Security rules deployed
+- ✅ Composite indexes configured
+
 ### Completed Components
-- ✅ Button, Card, Input, Label
-- ✅ Avatar, Dropdown Menu, Switch
-- ✅ Sheet (Bottom Sheet)
-- ✅ Bottom Navigation
-- ✅ Dashboard Layout with Header
+- ✅ All shadcn/ui base components
+- ✅ Full dashboard with real-time data
+- ✅ Working expense tracking
+- ✅ Budget monitoring
 
 ## 🚀 Getting Started
 
@@ -110,34 +124,17 @@ expense-tracker/
 
 ## 🎯 Next Steps
 
-### Phase 3: Core UI Components
-- Budget Ring (circular progress indicator)
-- Expense List with grouping
-- Expense Item component
-- Add Expense Sheet (bottom drawer)
-- Category Picker
-
-### Phase 4: Firebase Integration & Data Hooks
-- Firestore functions for CRUD operations
-- Real-time expense subscription
-- Budget calculation hooks
-- User settings management
-
-### Phase 5: MCP Server Integration
+### Phase 5: MCP Server Integration - **NEXT**
 - MCP server for Claude integration
 - Expense extraction from screenshots
 - Tools: add_expenses, get_summary, get_expenses
 
-### Phase 6: Push Notifications
-- Service worker for FCM
-- Budget threshold alerts
-- Notification permissions
-
-### Phase 7-10: Complete Features
+### Phase 6-10: Additional Features - **PLANNED**
+- Push notifications & alerts
 - Insights page with charts
-- Settings page
+- Enhanced settings page
 - PWA setup
-- Vercel deployment
+- Production deployment optimization
 
 ## 🛠 Tech Stack
 
@@ -164,9 +161,9 @@ expense-tracker/
 
 ## 🐛 Known Issues
 
-- Firebase environment variables need to be configured
-- Insights and Settings pages are placeholders
-- MCP integration pending
+- Insights and Settings pages need full implementation
+- MCP integration pending (Phase 5)
+- Edit/delete expense UI needs to be added
 
 ## 📄 License
 
@@ -178,4 +175,4 @@ Yashodha
 
 ---
 
-**Status:** Phase 1 & 2 Complete ✅ | Build Status: ✅ Passing
+**Status:** Phases 1-4 Complete (40%) ✅ | Build Status: ✅ Passing | Firebase: ✅ Deployed
