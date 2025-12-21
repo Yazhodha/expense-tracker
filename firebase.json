@@ -4,7 +4,6 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "site": "spendwise-expense-tracker-app",
     "public": "out",
     "ignore": [
       "firebase.json",
