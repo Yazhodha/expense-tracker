@@ -2,16 +2,19 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { format } from 'date-fns';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Category } from '@/lib/types';
-import { Plus, Check } from 'lucide-react';
+import { Plus, Check, Calendar as CalendarIcon } from 'lucide-react';
 import * as Icons from 'lucide-react';
 
 interface AddExpenseSheetProps {
   categories: Category[];
-  onAdd: (expense: { amount: number; category: string; merchant?: string; note?: string }) => Promise<void>;
+  onAdd: (expense: { amount: number; category: string; merchant?: string; note?: string; date?: Date }) => Promise<void>;
   currency?: string;
 }
 
@@ -20,6 +23,7 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
   const [amount, setAmount] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [merchant, setMerchant] = useState('');
+  const [date, setDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -31,12 +35,14 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
         amount: Number(amount),
         category: selectedCategory,
         merchant: merchant || undefined,
+        date: date,
       });
 
       // Reset form
       setAmount('');
       setSelectedCategory(null);
       setMerchant('');
+      setDate(new Date());
       setOpen(false);
     } finally {
       setLoading(false);
@@ -100,6 +106,30 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
                 );
               })}
             </div>
+          </div>
+
+          {/* Date picker */}
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">Date</p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(date, 'PPP')}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(newDate) => newDate && setDate(newDate)}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Merchant (optional) */}

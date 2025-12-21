@@ -15,11 +15,12 @@ export default function DashboardPage() {
     amount: number;
     category: string;
     merchant?: string;
+    date?: Date;
   }) => {
     try {
       await addExpense({
         ...expense,
-        date: new Date(),
+        date: expense.date || new Date(),
         source: 'manual',
       });
     } catch (error) {
