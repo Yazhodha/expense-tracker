@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useExpenses } from '@/lib/hooks/useExpenses';
 import { BudgetCard } from '@/components/dashboard/BudgetCard';
@@ -19,6 +20,7 @@ export default function DashboardPage() {
     amount: number;
     category: string;
     merchant?: string;
+    note?: string;
     date?: Date;
   }) => {
     try {
@@ -27,9 +29,10 @@ export default function DashboardPage() {
         date: expense.date || new Date(),
         source: 'manual',
       });
+      toast.success('Expense added successfully');
     } catch (error) {
       console.error('Error adding expense:', error);
-      alert('Failed to add expense. Please try again.');
+      toast.error('Failed to add expense. Please try again.');
     }
   };
 
@@ -38,7 +41,7 @@ export default function DashboardPage() {
       await updateExpense(expenseId, updates);
     } catch (error) {
       console.error('Error updating expense:', error);
-      alert('Failed to update expense. Please try again.');
+      toast.error('Failed to update expense. Please try again.');
     }
   };
 
@@ -47,7 +50,7 @@ export default function DashboardPage() {
       await deleteExpense(expenseId);
     } catch (error) {
       console.error('Error deleting expense:', error);
-      alert('Failed to delete expense. Please try again.');
+      toast.error('Failed to delete expense. Please try again.');
     }
   };
 

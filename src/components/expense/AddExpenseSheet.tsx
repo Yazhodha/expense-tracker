@@ -23,18 +23,20 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
   const [amount, setAmount] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [merchant, setMerchant] = useState('');
+  const [note, setNote] = useState('');
   const [date, setDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!amount || !selectedCategory) return;
+    if (!amount || !selectedCategory || !merchant) return;
 
     setLoading(true);
     try {
       await onAdd({
         amount: Number(amount),
         category: selectedCategory,
-        merchant: merchant || undefined,
+        merchant: merchant,
+        note: note || undefined,
         date: date,
       });
 
@@ -42,6 +44,7 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
       setAmount('');
       setSelectedCategory(null);
       setMerchant('');
+      setNote('');
       setDate(new Date());
       setOpen(false);
     } finally {
@@ -62,16 +65,16 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
 
       <SheetContent
         side="bottom"
-        className="h-[85vh] rounded-t-3xl !left-1/2 !right-auto !-translate-x-1/2 w-full max-w-md data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom"
+        className="h-[85vh] rounded-t-3xl !left-1/2 !right-auto !-translate-x-1/2 w-full max-w-md data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom flex flex-col"
       >
-          <SheetHeader className="text-left">
+          <SheetHeader className="text-left flex-shrink-0">
             <SheetTitle>Add Expense</SheetTitle>
             <SheetDescription className="sr-only">
-              Enter the amount, select a category, optionally add a merchant name and choose a date for this expense.
+              Enter the amount, select a category, add a merchant name, optionally add a note and choose a date for this expense.
             </SheetDescription>
           </SheetHeader>
 
-          <div className="mt-6 space-y-6">
+          <div className="mt-6 space-y-6 overflow-y-auto flex-1 pr-2">
           {/* Amount input */}
           <div className="text-center">
             <span className="text-2xl text-muted-foreground">{currency}</span>
@@ -141,9 +144,9 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
             </Popover>
           </div>
 
-          {/* Merchant (optional) */}
+          {/* Merchant (required) */}
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Merchant (optional)</p>
+            <p className="text-sm text-muted-foreground mb-2">Merchant</p>
             <Input
               value={merchant}
               onChange={(e) => setMerchant(e.target.value)}
@@ -151,11 +154,21 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
             />
           </div>
 
+          {/* Note (optional) */}
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">Note (optional)</p>
+            <Input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Add a note about this expense"
+            />
+          </div>
+
           {/* Submit button */}
           <Button
             className="w-full h-12"
             size="lg"
-            disabled={!amount || !selectedCategory || loading}
+            disabled={!amount || !selectedCategory || !merchant || loading}
             onClick={handleSubmit}
           >
             {loading ? (

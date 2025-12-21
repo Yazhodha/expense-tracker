@@ -20,13 +20,24 @@ export async function addExpense(
   userId: string,
   expense: Omit<Expense, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
 ): Promise<string> {
-  const docRef = await addDoc(collection(db, EXPENSES_COLLECTION), {
-    ...expense,
+  // Remove undefined values to avoid Firebase errors
+  const expenseData: any = {
     userId,
+    amount: expense.amount,
+    category: expense.category,
+    merchant: expense.merchant,
+    source: expense.source,
     date: Timestamp.fromDate(expense.date),
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
-  });
+  };
+
+  // Only add note if it has a value
+  if (expense.note) {
+    expenseData.note = expense.note;
+  }
+
+  const docRef = await addDoc(collection(db, EXPENSES_COLLECTION), expenseData);
   return docRef.id;
 }
 
@@ -36,9 +47,21 @@ export async function updateExpense(
 ): Promise<void> {
   const docRef = doc(db, EXPENSES_COLLECTION, expenseId);
   const updateData: any = {
-    ...updates,
     updatedAt: Timestamp.now(),
   };
+
+  // Only include fields that are provided
+  if (updates.amount !== undefined) updateData.amount = updates.amount;
+  if (updates.category !== undefined) updateData.category = updates.category;
+  if (updates.merchant !== undefined) updateData.merchant = updates.merchant;
+  if (updates.source !== undefined) updateData.source = updates.source;
+
+  // Only add note if it has a value (null/empty string removes it)
+  if (updates.note !== undefined) {
+    if (updates.note) {
+      updateData.note = updates.note;
+    }
+  }
 
   // Convert date to Timestamp if it's being updated
   if (updates.date) {
