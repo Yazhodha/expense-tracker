@@ -1,15 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useExpenses } from '@/lib/hooks/useExpenses';
 import { BudgetCard } from '@/components/dashboard/BudgetCard';
 import { ExpenseList } from '@/components/dashboard/ExpenseList';
 import { AddExpenseSheet } from '@/components/expense/AddExpenseSheet';
+import { EditExpenseSheet } from '@/components/expense/EditExpenseSheet';
+import { Expense } from '@/lib/types';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { expenses, loading, summary, addExpense } = useExpenses();
+  const { expenses, loading, summary, addExpense, updateExpense, deleteExpense } = useExpenses();
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
   const handleAddExpense = async (expense: {
     amount: number;
@@ -26,6 +30,24 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error adding expense:', error);
       alert('Failed to add expense. Please try again.');
+    }
+  };
+
+  const handleUpdateExpense = async (expenseId: string, updates: Partial<Expense>) => {
+    try {
+      await updateExpense(expenseId, updates);
+    } catch (error) {
+      console.error('Error updating expense:', error);
+      alert('Failed to update expense. Please try again.');
+    }
+  };
+
+  const handleDeleteExpense = async (expenseId: string) => {
+    try {
+      await deleteExpense(expenseId);
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      alert('Failed to delete expense. Please try again.');
     }
   };
 
@@ -55,6 +77,7 @@ export default function DashboardPage() {
           expenses={expenses}
           categories={user.settings.categories}
           currency={user.settings.currency}
+          onEditExpense={setEditingExpense}
         />
       </div>
 
@@ -63,6 +86,17 @@ export default function DashboardPage() {
         categories={user.settings.categories}
         currency={user.settings.currency}
         onAdd={handleAddExpense}
+      />
+
+      {/* Edit Expense Sheet */}
+      <EditExpenseSheet
+        expense={editingExpense}
+        categories={user.settings.categories}
+        currency={user.settings.currency}
+        open={editingExpense !== null}
+        onOpenChange={(open) => !open && setEditingExpense(null)}
+        onUpdate={handleUpdateExpense}
+        onDelete={handleDeleteExpense}
       />
     </motion.div>
   );

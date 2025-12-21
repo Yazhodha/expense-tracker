@@ -58,16 +58,16 @@ export function subscribeToExpenses(
   endDate: Date,
   callback: (expenses: Expense[]) => void
 ): () => void {
+  // Simplified query - only filter by userId and order by date
+  // We'll filter the date range in memory to avoid complex index requirements
   const q = query(
     collection(db, EXPENSES_COLLECTION),
     where('userId', '==', userId),
-    where('date', '>=', Timestamp.fromDate(startDate)),
-    where('date', '<=', Timestamp.fromDate(endDate)),
     orderBy('date', 'desc')
   );
 
   return onSnapshot(q, (snapshot) => {
-    const expenses = snapshot.docs.map((doc) => {
+    const allExpenses = snapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         id: doc.id,
@@ -83,7 +83,12 @@ export function subscribeToExpenses(
       };
     }) as Expense[];
 
-    callback(expenses);
+    // Filter by date range in memory
+    const filteredExpenses = allExpenses.filter((expense) => {
+      return expense.date >= startDate && expense.date <= endDate;
+    });
+
+    callback(filteredExpenses);
   });
 }
 
@@ -92,16 +97,15 @@ export async function getExpensesForCycle(
   startDate: Date,
   endDate: Date
 ): Promise<Expense[]> {
+  // Simplified query - only filter by userId and order by date
   const q = query(
     collection(db, EXPENSES_COLLECTION),
     where('userId', '==', userId),
-    where('date', '>=', Timestamp.fromDate(startDate)),
-    where('date', '<=', Timestamp.fromDate(endDate)),
     orderBy('date', 'desc')
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => {
+  const allExpenses = snapshot.docs.map((doc) => {
     const data = doc.data();
     return {
       id: doc.id,
@@ -116,4 +120,9 @@ export async function getExpensesForCycle(
       source: data.source,
     };
   }) as Expense[];
+
+  // Filter by date range in memory
+  return allExpenses.filter((expense) => {
+    return expense.date >= startDate && expense.date <= endDate;
+  });
 }

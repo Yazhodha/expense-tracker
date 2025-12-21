@@ -62,7 +62,7 @@ export function BudgetRing({ percent, size = 200, strokeWidth = 16 }: BudgetRing
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5 }}
         >
-          {Math.round(percent)}%
+          {percent < 1 && percent > 0 ? percent.toFixed(1) : Math.round(percent)}%
         </motion.span>
         <span className="text-sm text-muted-foreground">used</span>
       </div>

@@ -1,77 +1,106 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Category } from '@/lib/types';
-import { Plus, Check, Calendar as CalendarIcon } from 'lucide-react';
+import { Expense, Category } from '@/lib/types';
+import { Check, Calendar as CalendarIcon, Trash2 } from 'lucide-react';
 import * as Icons from 'lucide-react';
 
-interface AddExpenseSheetProps {
+interface EditExpenseSheetProps {
+  expense: Expense | null;
   categories: Category[];
-  onAdd: (expense: { amount: number; category: string; merchant?: string; note?: string; date?: Date }) => Promise<void>;
   currency?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onUpdate: (expenseId: string, updates: Partial<Expense>) => Promise<void>;
+  onDelete: (expenseId: string) => Promise<void>;
 }
 
-export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpenseSheetProps) {
-  const [open, setOpen] = useState(false);
-  const [amount, setAmount] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [merchant, setMerchant] = useState('');
-  const [date, setDate] = useState<Date>(new Date());
+export function EditExpenseSheet({
+  expense,
+  categories,
+  currency = 'Rs.',
+  open,
+  onOpenChange,
+  onUpdate,
+  onDelete,
+}: EditExpenseSheetProps) {
+  const [amount, setAmount] = useState(expense?.amount.toString() || '');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(expense?.category || null);
+  const [merchant, setMerchant] = useState(expense?.merchant || '');
+  const [date, setDate] = useState<Date>(expense?.date || new Date());
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const handleSubmit = async () => {
-    if (!amount || !selectedCategory) return;
+  // Update state when expense changes
+  useEffect(() => {
+    if (expense) {
+      setAmount(expense.amount.toString());
+      setSelectedCategory(expense.category);
+      setMerchant(expense.merchant || '');
+      setDate(expense.date);
+    }
+  }, [expense]);
+
+  const handleUpdate = async () => {
+    if (!amount || !selectedCategory || !expense) return;
 
     setLoading(true);
     try {
-      await onAdd({
+      await onUpdate(expense.id, {
         amount: Number(amount),
         category: selectedCategory,
         merchant: merchant || undefined,
         date: date,
       });
-
-      // Reset form
-      setAmount('');
-      setSelectedCategory(null);
-      setMerchant('');
-      setDate(new Date());
-      setOpen(false);
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error updating expense:', error);
+      alert('Failed to update expense. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          size="lg"
-          className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg z-50"
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
-      </SheetTrigger>
+  const handleDelete = async () => {
+    if (!expense) return;
 
+    if (!confirm('Are you sure you want to delete this expense?')) return;
+
+    setDeleting(true);
+    try {
+      await onDelete(expense.id);
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      alert('Failed to delete expense. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  if (!expense) return null;
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
         className="h-[85vh] rounded-t-3xl !left-1/2 !right-auto !-translate-x-1/2 w-full max-w-md data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom"
       >
-          <SheetHeader className="text-left">
-            <SheetTitle>Add Expense</SheetTitle>
-            <SheetDescription className="sr-only">
-              Enter the amount, select a category, optionally add a merchant name and choose a date for this expense.
-            </SheetDescription>
-          </SheetHeader>
+        <SheetHeader className="text-left">
+          <SheetTitle>Edit Expense</SheetTitle>
+          <SheetDescription className="sr-only">
+            Edit the amount, category, merchant, and date for this expense, or delete it permanently.
+          </SheetDescription>
+        </SheetHeader>
 
-          <div className="mt-6 space-y-6">
+        <div className="mt-6 space-y-6">
           {/* Amount input */}
           <div className="text-center">
             <span className="text-2xl text-muted-foreground">{currency}</span>
@@ -151,22 +180,41 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
             />
           </div>
 
-          {/* Submit button */}
-          <Button
-            className="w-full h-12"
-            size="lg"
-            disabled={!amount || !selectedCategory || loading}
-            onClick={handleSubmit}
-          >
-            {loading ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
-            ) : (
-              <>
-                <Check className="mr-2 h-5 w-5" />
-                Add Expense
-              </>
-            )}
-          </Button>
+          {/* Action buttons */}
+          <div className="space-y-3">
+            <Button
+              className="w-full h-12"
+              size="lg"
+              disabled={!amount || !selectedCategory || loading}
+              onClick={handleUpdate}
+            >
+              {loading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+              ) : (
+                <>
+                  <Check className="mr-2 h-5 w-5" />
+                  Update Expense
+                </>
+              )}
+            </Button>
+
+            <Button
+              variant="destructive"
+              className="w-full h-12"
+              size="lg"
+              disabled={deleting}
+              onClick={handleDelete}
+            >
+              {deleting ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-5 w-5" />
+                  Delete Expense
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </SheetContent>
     </Sheet>
