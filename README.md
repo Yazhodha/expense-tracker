@@ -4,40 +4,25 @@ A modern expense tracking application built with Next.js, Firebase, and Tailwind
 
 ## ✅ Implementation Status
 
-### Phase 1: Project Setup & Foundation - **COMPLETE**
+### Core Features - **COMPLETE** ✅
 - ✅ Next.js 14 with TypeScript and App Router
-- ✅ Tailwind CSS v3 with shadcn/ui components
-- ✅ Project structure with organized folders
-- ✅ TypeScript type definitions
-- ✅ Environment variables template
+- ✅ Firebase Authentication (Google Sign-in)
+- ✅ Real-time Firestore database sync
+- ✅ Expense tracking (Add, Edit, Delete, Search)
+- ✅ Budget monitoring with billing cycles
+- ✅ Category-based organization
+- ✅ Animated UI components (Framer Motion)
+- ✅ Mobile-first responsive design
+- ✅ Protected routes & user settings
 
-### Phase 2: Firebase Setup & Authentication - **COMPLETE**
-- ✅ Firebase configuration
-- ✅ Google Authentication with AuthProvider
-- ✅ Utility functions (currency formatting, billing cycles)
-- ✅ Login page with animations
-- ✅ Protected dashboard layout
+### Enhanced Features - **COMPLETE** ✅
+- ✅ Expense search (merchant, category, note, amount)
+- ✅ Basic insights (category breakdown, daily trends)
+- ✅ Settings page (budget configuration)
+- ✅ Edit/Delete expense functionality
 
-### Phase 3: Core UI Components - **COMPLETE**
-- ✅ BudgetRing (animated circular progress)
-- ✅ BudgetCard with cycle info
-- ✅ ExpenseList with date grouping
-- ✅ ExpenseItem component
-- ✅ AddExpenseSheet (bottom drawer)
-
-### Phase 4: Firebase Integration & Data Hooks - **COMPLETE**
-- ✅ Firestore CRUD functions
-- ✅ Real-time expense subscription
-- ✅ useExpenses hook
-- ✅ Budget calculations
-- ✅ Security rules deployed
-- ✅ Composite indexes configured
-
-### Completed Components
-- ✅ All shadcn/ui base components
-- ✅ Full dashboard with real-time data
-- ✅ Working expense tracking
-- ✅ Budget monitoring
+### Next Up: Analytics & Insights 📊
+See [`docs/analytics-insights-plan.md`](docs/analytics-insights-plan.md) for detailed roadmap
 
 ## 🚀 Getting Started
 
@@ -124,17 +109,22 @@ expense-tracker/
 
 ## 🎯 Next Steps
 
-### Phase 5: MCP Server Integration - **NEXT**
-- MCP server for Claude integration
-- Expense extraction from screenshots
-- Tools: add_expenses, get_summary, get_expenses
+### Phase 5: Historical Cycle Comparison - **IN PROGRESS**
+- Previous vs current cycle comparison
+- Cycle history page (last 6 months)
+- Trend indicators and insights
 
-### Phase 6-10: Additional Features - **PLANNED**
-- Push notifications & alerts
-- Insights page with charts
-- Enhanced settings page
-- PWA setup
-- Production deployment optimization
+### Phase 6-9: Analytics & Insights - **PLANNED**
+- Category spending trends over time
+- Spending pattern analysis (weekday/weekend, peak days)
+- Smart insights engine with recommendations
+- Spending velocity & projections
+
+### Future Enhancements
+- Push notifications & budget alerts
+- Spending score & gamification
+- Export reports (PDF/CSV)
+- MCP integration for Claude AI (optional)
 
 ## 🛠 Tech Stack
 
@@ -150,20 +140,29 @@ expense-tracker/
 
 ## 📝 Features
 
+### Current Features
 - 🔐 Google Authentication
-- 💰 Monthly budget tracking (Rs. 100,000 default)
-- 📅 Billing cycle management (15th - 14th)
-- 📊 Real-time expense tracking
-- 🎨 Beautiful, responsive UI
-- 🌙 Mobile-first design
-- 🔔 Budget alerts (planned)
-- 🤖 Claude AI integration via MCP (planned)
+- 💰 Monthly budget tracking with customizable limits
+- 📅 Flexible billing cycle (configurable start date)
+- 📊 Real-time expense tracking with search
+- ✏️ Edit and delete expenses
+- 📈 Category breakdown and spending insights
+- 🎨 Beautiful, animated UI (Framer Motion)
+- 📱 Mobile-first responsive design
+- ⚡ Instant sync across devices (Firebase)
 
-## 🐛 Known Issues
+### Coming Soon
+- 📊 Historical cycle comparisons
+- 📈 Category spending trends
+- 🎯 Smart spending insights
+- 🔔 Budget alerts & notifications
+- 💯 Spending score
+- 📥 Export data (CSV/PDF)
 
-- Insights and Settings pages need full implementation
-- MCP integration pending (Phase 5)
-- Edit/delete expense UI needs to be added
+## 📚 Documentation
+
+- [`docs/analytics-insights-plan.md`](docs/analytics-insights-plan.md) - Detailed plan for analytics features
+- [`docs/archive-original-implementation-plan.md`](docs/archive-original-implementation-plan.md) - Original implementation plan (archived)
 
 ## 📄 License
 
@@ -175,4 +174,4 @@ Yashodha
 
 ---
 
-**Status:** Phases 1-4 Complete (40%) ✅ | Build Status: ✅ Passing | Firebase: ✅ Deployed
+**Status:** Core Complete ✅ | Analytics In Progress 📊 | Build Status: ✅ Passing | Firebase: ✅ Deployed
