@@ -191,7 +191,7 @@ export function EditExpenseSheet({
             </Popover>
           </div>
 
-          {/* Merchant (required) */}
+          {/* Merchant */}
           <div>
             <p className="text-sm text-muted-foreground mb-2">Merchant</p>
             <Input

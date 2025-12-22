@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { useAuth } from '@/components/providers/AuthProvider';
@@ -9,12 +9,15 @@ import { BudgetCard } from '@/components/dashboard/BudgetCard';
 import { ExpenseList } from '@/components/dashboard/ExpenseList';
 import { AddExpenseSheet } from '@/components/expense/AddExpenseSheet';
 import { EditExpenseSheet } from '@/components/expense/EditExpenseSheet';
+import { Input } from '@/components/ui/input';
 import { Expense } from '@/lib/types';
+import { Search, X } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const { expenses, loading, summary, addExpense, updateExpense, deleteExpense } = useExpenses();
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleAddExpense = async (expense: {
     amount: number;
@@ -54,6 +57,26 @@ export default function DashboardPage() {
     }
   };
 
+  // Filter expenses based on search query
+  const filteredExpenses = useMemo(() => {
+    if (!searchQuery.trim()) return expenses;
+
+    const query = searchQuery.toLowerCase();
+    return expenses.filter((expense) => {
+      const merchant = expense.merchant?.toLowerCase() || '';
+      const note = expense.note?.toLowerCase() || '';
+      const category = user?.settings.categories.find(c => c.id === expense.category)?.name.toLowerCase() || '';
+      const amount = expense.amount.toString();
+
+      return (
+        merchant.includes(query) ||
+        note.includes(query) ||
+        category.includes(query) ||
+        amount.includes(query)
+      );
+    });
+  }, [expenses, searchQuery, user?.settings.categories]);
+
   if (!user) return null;
 
   if (loading) {
@@ -73,11 +96,38 @@ export default function DashboardPage() {
       {/* Budget Overview */}
       <BudgetCard summary={summary} currency={user.settings.currency} />
 
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Search by merchant, category, note, or amount..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 pr-10"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
       {/* Recent Expenses */}
       <div>
-        <h2 className="font-semibold mb-4">Recent Expenses</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold">Recent Expenses</h2>
+          {searchQuery && (
+            <span className="text-sm text-muted-foreground">
+              {filteredExpenses.length} result{filteredExpenses.length !== 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
         <ExpenseList
-          expenses={expenses}
+          expenses={filteredExpenses}
           categories={user.settings.categories}
           currency={user.settings.currency}
           onEditExpense={setEditingExpense}
