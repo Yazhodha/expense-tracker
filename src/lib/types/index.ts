@@ -13,6 +13,7 @@ export interface UserSettings {
   categories: Category[];
   notificationsEnabled: boolean;
   alertThresholds: number[]; // Default: [50, 75, 90, 100]
+  theme: 'light' | 'dark' | 'system'; // Default: 'system'
 }
 
 export interface Category {

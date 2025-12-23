@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { formatCurrency } from '@/lib/utils/currency';
 import { SaveIcon } from 'lucide-react';
@@ -44,6 +45,22 @@ export default function SettingsPage() {
       className="pb-24 px-4 pt-4 max-w-md mx-auto space-y-6"
     >
       <h1 className="text-2xl font-bold">Settings</h1>
+
+      {/* Appearance Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Appearance</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Theme</Label>
+            <ThemeToggle />
+            <p className="text-xs text-muted-foreground">
+              Choose your preferred color scheme
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Budget Settings */}
       <Card>

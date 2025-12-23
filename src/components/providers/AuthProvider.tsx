@@ -30,6 +30,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   ],
   notificationsEnabled: true,
   alertThresholds: [50, 75, 90, 100],
+  theme: 'system',
 };
 
 interface AuthContextType {
