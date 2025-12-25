@@ -1,18 +1,19 @@
 # Dependencies
-/node_modules
-/.pnp
+node_modules/
+.pnp
 .pnp.js
 .yarn/install-state.gz
 
 # Testing
-/coverage
+coverage/
 
 # Next.js
-/.next/
-/out/
+.next/
+out/
 
 # Production
-/build
+build/
+dist/
 
 # Misc
 .DS_Store
@@ -37,3 +38,10 @@ firestore-debug.log
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Expo (for mobile app)
+.expo/
+.expo-shared/
+
+# Turborepo
+.turbo/
