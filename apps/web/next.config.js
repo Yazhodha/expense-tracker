@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'export',
+  // Note: 'output: export' is only for static builds (npm run build)
+  // For development (npm run dev), we need server-side rendering
+  // output: 'export',
   images: {
     unoptimized: true,
   },
