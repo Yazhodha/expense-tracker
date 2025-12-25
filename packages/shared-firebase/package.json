@@ -1,0 +1,18 @@
+{
+  "name": "@expense-tracker/shared-firebase",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "private": true,
+  "description": "Shared Firebase logic with platform adapter pattern",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "firebase": "^12.7.0"
+  },
+  "devDependencies": {
+    "@expense-tracker/shared-types": "workspace:*",
+    "typescript": "^5.9.3"
+  }
+}

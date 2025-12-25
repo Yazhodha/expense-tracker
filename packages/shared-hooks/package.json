@@ -1,0 +1,24 @@
+{
+  "name": "@expense-tracker/shared-hooks",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "private": true,
+  "description": "Shared React hooks for expense tracker",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@expense-tracker/shared-types": "workspace:*",
+    "@expense-tracker/shared-utils": "workspace:*",
+    "@expense-tracker/shared-firebase": "workspace:*",
+    "@types/react": "^18.3.18",
+    "typescript": "^5.9.3"
+  }
+}
