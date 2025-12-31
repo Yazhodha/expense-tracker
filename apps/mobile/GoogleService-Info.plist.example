@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- This is an example file. Download the actual GoogleService-Info.plist from Firebase Console -->
+  <!-- Instructions:
+    1. Go to https://console.firebase.google.com/
+    2. Select your expense-tracker project
+    3. Click Settings > Project settings
+    4. Scroll to 'Your apps' section
+    5. Click 'Add app' > iOS
+    6. Use bundle ID: com.expensetracker.app
+    7. Download GoogleService-Info.plist
+    8. Replace this file (remove .example extension)
+  -->
+  <key>CLIENT_ID</key>
+  <string>YOUR_CLIENT_ID.apps.googleusercontent.com</string>
+  <key>REVERSED_CLIENT_ID</key>
+  <string>com.googleusercontent.apps.YOUR_REVERSED_CLIENT_ID</string>
+  <key>API_KEY</key>
+  <string>YOUR_API_KEY</string>
+  <key>GCM_SENDER_ID</key>
+  <string>YOUR_GCM_SENDER_ID</string>
+  <key>PROJECT_ID</key>
+  <string>YOUR_PROJECT_ID</string>
+  <key>STORAGE_BUCKET</key>
+  <string>YOUR_STORAGE_BUCKET.appspot.com</string>
+  <key>GOOGLE_APP_ID</key>
+  <string>YOUR_GOOGLE_APP_ID</string>
+</dict>
+</plist>
