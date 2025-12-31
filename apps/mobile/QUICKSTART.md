@@ -55,6 +55,8 @@ You need to get two files from your Firebase Console.
 5. You'll see **"Web client ID"** - it looks like: `123456789-abc123def456.apps.googleusercontent.com`
 6. **Copy this ID** (you'll need it in the next step)
 
+39820487912-bt6i6o5fecvp18gvfjok5rh2rjqrvv10.apps.googleusercontent.com
+
 ---
 
 ## Step 3: Create .env File
