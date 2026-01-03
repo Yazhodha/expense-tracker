@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Home, PieChart, Settings } from 'lucide-react';
+import { Home, PieChart, Settings, Calendar } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', icon: Home, label: 'Home' },
   { href: '/insights', icon: PieChart, label: 'Insights' },
+  { href: '/cycles', icon: Calendar, label: 'Cycles' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ];
 

@@ -55,6 +55,69 @@ export interface BudgetSummary {
   isOverBudget: boolean;
 }
 
+// Cycle History & Comparison Types
+export interface CycleSummary {
+  cycle: BillingCycle;
+  cycleId: string;           // Unique ID: YYYY-MM-DD
+  totalSpent: number;
+  budgetLimit: number;
+  percentUsed: number;
+  isOverBudget: boolean;
+  expenseCount: number;
+  avgDailySpending: number;
+  categoryBreakdown: CategorySpending[];
+  topExpenses: Expense[];    // Top 5 expenses
+}
+
+export interface CategorySpending {
+  categoryId: string;
+  categoryName: string;
+  amount: number;
+  expenseCount: number;
+  percentOfTotal: number;
+}
+
+export interface CycleComparison {
+  cycle1: CycleSummary;
+  cycle2: CycleSummary;
+  totalSpentDiff: number;
+  totalSpentDiffPercent: number;
+  budgetPerformanceDiff: number; // Difference in percentUsed
+  categoryComparisons: CategoryComparison[];
+  metrics: MetricsComparison;
+  overallTrend: 'improved' | 'stable' | 'worsened';
+}
+
+export interface CategoryComparison {
+  categoryId: string;
+  categoryName: string;
+  cycle1Amount: number;
+  cycle2Amount: number;
+  difference: number;
+  percentChange: number;
+  trend: 'improved' | 'stable' | 'worsened';
+}
+
+export interface MetricsComparison {
+  avgDailySpending: {
+    cycle1: number;
+    cycle2: number;
+    difference: number;
+    percentChange: number;
+  };
+  largestExpense: {
+    cycle1: number;
+    cycle2: number;
+    difference: number;
+  };
+  expenseCount: {
+    cycle1: number;
+    cycle2: number;
+    difference: number;
+    percentChange: number;
+  };
+}
+
 // MCP Tool Types (web-only, but included for completeness)
 export interface AddExpenseInput {
   expenses: Array<{
