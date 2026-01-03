@@ -39,9 +39,5 @@ firestore-debug.log
 *.tsbuildinfo
 next-env.d.ts
 
-# Expo (for mobile app)
-.expo/
-.expo-shared/
-
 # Turborepo
 .turbo/
