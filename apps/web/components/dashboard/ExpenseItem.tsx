@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Expense, Category } from '@expense-tracker/shared-types';
-import { formatCurrency } from '@expense-tracker/shared-utils';
+import { formatCurrency, CurrencyFormat } from '@expense-tracker/shared-utils';
 import { format } from 'date-fns';
 import * as Icons from 'lucide-react';
 
@@ -10,10 +10,11 @@ interface ExpenseItemProps {
   expense: Expense;
   category: Category;
   currency?: string;
+  currencyFormat?: CurrencyFormat;
   onEdit?: (expense: Expense) => void;
 }
 
-export function ExpenseItem({ expense, category, currency = 'Rs.', onEdit }: ExpenseItemProps) {
+export function ExpenseItem({ expense, category, currency = 'Rs.', currencyFormat = 'en-LK', onEdit }: ExpenseItemProps) {
   // Dynamic icon component
   const IconComponent = (Icons as any)[category.icon] || Icons.Circle;
 
@@ -42,7 +43,7 @@ export function ExpenseItem({ expense, category, currency = 'Rs.', onEdit }: Exp
       {/* Amount */}
       <div className="text-right">
         <p className="font-semibold">
-          {formatCurrency(expense.amount, currency)}
+          {formatCurrency(expense.amount, currency, currencyFormat)}
         </p>
         {expense.source === 'claude' && (
           <p className="text-xs text-muted-foreground">via Claude</p>

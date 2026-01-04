@@ -8,13 +8,23 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { formatCurrency } from '@expense-tracker/shared-utils';
+import { formatCurrency, CURRENCY_FORMATS, CurrencyFormat } from '@expense-tracker/shared-utils';
 import { SaveIcon } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function SettingsPage() {
   const { user, updateSettings } = useAuth();
   const [monthlyLimit, setMonthlyLimit] = useState(String(user?.settings.monthlyLimit || 100000));
   const [billingDate, setBillingDate] = useState(String(user?.settings.billingDate || 15));
+  const [currencyFormat, setCurrencyFormat] = useState<CurrencyFormat>(
+    (user?.settings.currencyFormat as CurrencyFormat) || 'en-LK'
+  );
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -22,9 +32,12 @@ export default function SettingsPage() {
     setSaving(true);
     setSuccessMessage('');
     try {
+      const selectedCurrency = CURRENCY_FORMATS[currencyFormat];
       await updateSettings({
         monthlyLimit: Number(monthlyLimit),
         billingDate: Number(billingDate),
+        currencyFormat: currencyFormat,
+        currency: selectedCurrency.symbol,
       });
       setSuccessMessage('Settings saved successfully!');
       setTimeout(() => setSuccessMessage(''), 3000);
@@ -69,9 +82,28 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="currencyFormat">Currency & Format</Label>
+            <Select value={currencyFormat} onValueChange={(value) => setCurrencyFormat(value as CurrencyFormat)}>
+              <SelectTrigger id="currencyFormat">
+                <SelectValue placeholder="Select currency format" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(CURRENCY_FORMATS).map(([key, value]) => (
+                  <SelectItem key={key} value={key}>
+                    {value.name} ({value.symbol})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Preview: {formatCurrency(100000, CURRENCY_FORMATS[currencyFormat].symbol, currencyFormat)}
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="monthlyLimit">Monthly Budget Limit</Label>
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">{user.settings.currency}</span>
+              <span className="text-muted-foreground">{CURRENCY_FORMATS[currencyFormat].symbol}</span>
               <Input
                 id="monthlyLimit"
                 type="number"
@@ -82,7 +114,7 @@ export default function SettingsPage() {
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              Current: {formatCurrency(user.settings.monthlyLimit, user.settings.currency)}
+              Current: {formatCurrency(user.settings.monthlyLimit, user.settings.currency, user.settings.currencyFormat as CurrencyFormat)}
             </p>
           </div>
 

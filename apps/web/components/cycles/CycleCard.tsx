@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { CycleSummary } from '@expense-tracker/shared-types';
-import { formatCurrency } from '@expense-tracker/shared-utils';
+import { formatCurrency, CurrencyFormat } from '@expense-tracker/shared-utils';
 import { format } from 'date-fns';
 import { ArrowRight, TrendingDown, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
@@ -10,10 +10,11 @@ import Link from 'next/link';
 interface CycleCardProps {
   summary: CycleSummary;
   currency?: string;
+  currencyFormat?: CurrencyFormat;
   showDetails?: boolean;
 }
 
-export function CycleCard({ summary, currency = 'Rs.', showDetails = false }: CycleCardProps) {
+export function CycleCard({ summary, currency = 'Rs.', currencyFormat = 'en-LK', showDetails = false }: CycleCardProps) {
   const { cycle, totalSpent, budgetLimit, percentUsed, isOverBudget, expenseCount } = summary;
 
   const statusColor = isOverBudget
@@ -60,10 +61,10 @@ export function CycleCard({ summary, currency = 'Rs.', showDetails = false }: Cy
           <div className="mb-4">
             <div className="flex justify-between items-baseline mb-2">
               <span className="text-2xl font-bold">
-                {formatCurrency(totalSpent, currency)}
+                {formatCurrency(totalSpent, currency, currencyFormat)}
               </span>
               <span className="text-sm text-muted-foreground">
-                of {formatCurrency(budgetLimit, currency)}
+                of {formatCurrency(budgetLimit, currency, currencyFormat)}
               </span>
             </div>
 
@@ -93,7 +94,7 @@ export function CycleCard({ summary, currency = 'Rs.', showDetails = false }: Cy
                 {summary.categoryBreakdown.slice(0, 3).map((cat) => (
                   <div key={cat.categoryId} className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{cat.categoryName}</span>
-                    <span className="font-medium">{formatCurrency(cat.amount, currency)}</span>
+                    <span className="font-medium">{formatCurrency(cat.amount, currency, currencyFormat)}</span>
                   </div>
                 ))}
               </div>

@@ -4,17 +4,18 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Expense, Category } from '@expense-tracker/shared-types';
 import { ExpenseItem } from './ExpenseItem';
-import { formatCurrency } from '@expense-tracker/shared-utils';
+import { formatCurrency, CurrencyFormat } from '@expense-tracker/shared-utils';
 import { format, isToday, isYesterday } from 'date-fns';
 
 interface ExpenseListProps {
   expenses: Expense[];
   categories: Category[];
   currency?: string;
+  currencyFormat?: CurrencyFormat;
   onEditExpense?: (expense: Expense) => void;
 }
 
-export function ExpenseList({ expenses, categories, currency, onEditExpense }: ExpenseListProps) {
+export function ExpenseList({ expenses, categories, currency, currencyFormat = 'en-LK', onEditExpense }: ExpenseListProps) {
   // Group expenses by date
   const groupedExpenses = useMemo(() => {
     const groups = new Map<string, Expense[]>();
@@ -64,7 +65,7 @@ export function ExpenseList({ expenses, categories, currency, onEditExpense }: E
           <div className="flex justify-between items-center mb-2">
             <h3 className="font-medium text-sm">{getDateLabel(dateStr)}</h3>
             <span className="text-sm text-muted-foreground">
-              {formatCurrency(getDayTotal(dayExpenses), currency)}
+              {formatCurrency(getDayTotal(dayExpenses), currency, currencyFormat)}
             </span>
           </div>
 
@@ -76,6 +77,7 @@ export function ExpenseList({ expenses, categories, currency, onEditExpense }: E
                 expense={expense}
                 category={getCategoryById(expense.category)}
                 currency={currency}
+                currencyFormat={currencyFormat}
                 onEdit={onEditExpense}
               />
             ))}

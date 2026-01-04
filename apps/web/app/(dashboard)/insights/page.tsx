@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { format, eachDayOfInterval, isToday } from 'date-fns';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useExpenses } from '@/lib/hooks/useExpenses';
+import { useCurrency } from '@/lib/hooks/useCurrency';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Calendar, PieChart } from 'lucide-react';
 import * as Icons from 'lucide-react';
@@ -12,6 +13,7 @@ import * as Icons from 'lucide-react';
 export default function InsightsPage() {
   const { user } = useAuth();
   const { expenses, loading, summary } = useExpenses();
+  const { formatCurrency } = useCurrency();
 
   // Calculate category breakdown
   const categoryBreakdown = useMemo(() => {
@@ -114,7 +116,7 @@ export default function InsightsPage() {
               <Calendar className="w-4 h-4" />
               <p className="text-sm">Avg Daily</p>
             </div>
-            <p className="text-2xl font-bold">{user.settings.currency}{avgDailySpending.toLocaleString()}</p>
+            <p className="text-2xl font-bold">{formatCurrency(avgDailySpending)}</p>
           </CardContent>
         </Card>
 
@@ -151,7 +153,7 @@ export default function InsightsPage() {
                       <span className="text-sm font-medium">{category.name}</span>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-semibold">{user.settings.currency}{category.total.toLocaleString()}</p>
+                      <p className="text-sm font-semibold">{formatCurrency(category.total)}</p>
                       <p className="text-xs text-muted-foreground">{percentage.toFixed(1)}%</p>
                     </div>
                   </div>
@@ -187,7 +189,7 @@ export default function InsightsPage() {
                     <span className={isCurrentDay ? 'font-semibold' : 'text-muted-foreground'}>
                       {format(day.date, 'EEE, MMM d')}
                     </span>
-                    <span className="font-medium">{user.settings.currency}{day.total.toLocaleString()}</span>
+                    <span className="font-medium">{formatCurrency(day.total)}</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div
@@ -213,7 +215,7 @@ export default function InsightsPage() {
           ) : (
             <div className="flex items-center justify-between">
               <p className="text-lg font-semibold">{topMerchant.name}</p>
-              <p className="text-xl font-bold text-primary">{user.settings.currency}{topMerchant.total.toLocaleString()}</p>
+              <p className="text-xl font-bold text-primary">{formatCurrency(topMerchant.total)}</p>
             </div>
           )}
         </CardContent>
@@ -250,7 +252,7 @@ export default function InsightsPage() {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Recommended Daily Budget</span>
-              <span className="font-medium">{user.settings.currency}{summary.dailyBudget.toLocaleString()}</span>
+              <span className="font-medium">{formatCurrency(summary.dailyBudget)}</span>
             </div>
           </div>
         </CardContent>

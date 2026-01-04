@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background with rounded corners -->
+  <rect width="512" height="512" rx="110" fill="url(#grad)"/>
+
+  <!-- Modern chart bars - minimal design -->
+  <rect x="140" y="280" width="48" height="120" rx="8" fill="white" opacity="0.9"/>
+  <rect x="212" y="200" width="48" height="200" rx="8" fill="white"/>
+  <rect x="284" y="240" width="48" height="160" rx="8" fill="white" opacity="0.9"/>
+  <rect x="356" y="160" width="48" height="240" rx="8" fill="white" opacity="0.85"/>
+
+  <!-- Trend line overlay -->
+  <path d="M 164 300 L 236 220 L 308 260 L 380 180" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
+
+  <!-- Circular accent dots on trend line -->
+  <circle cx="164" cy="300" r="8" fill="white"/>
+  <circle cx="236" cy="220" r="8" fill="white"/>
+  <circle cx="308" cy="260" r="8" fill="white"/>
+  <circle cx="380" cy="180" r="8" fill="white"/>
+</svg>

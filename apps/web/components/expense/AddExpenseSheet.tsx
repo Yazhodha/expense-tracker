@@ -32,8 +32,11 @@ export function AddExpenseSheet({ categories, onAdd, currency = 'Rs.' }: AddExpe
 
     setLoading(true);
     try {
+      // Round to 2 decimal places for financial precision
+      const roundedAmount = Math.round(Number(amount) * 100) / 100;
+
       await onAdd({
-        amount: Number(amount),
+        amount: roundedAmount,
         category: selectedCategory,
         merchant: merchant,
         note: note || undefined,

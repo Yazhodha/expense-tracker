@@ -94,7 +94,11 @@ export default function DashboardPage() {
       className="pb-24 px-4 pt-4 max-w-md mx-auto space-y-6"
     >
       {/* Budget Overview */}
-      <BudgetCard summary={summary} currency={user.settings.currency} />
+      <BudgetCard
+        summary={summary}
+        currency={user.settings.currency}
+        currencyFormat={user.settings.currencyFormat as any}
+      />
 
       {/* Search Bar */}
       <div className="relative">
@@ -130,6 +134,7 @@ export default function DashboardPage() {
           expenses={filteredExpenses}
           categories={user.settings.categories}
           currency={user.settings.currency}
+          currencyFormat={user.settings.currencyFormat as any}
           onEditExpense={setEditingExpense}
         />
       </div>

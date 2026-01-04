@@ -16,6 +16,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   monthlyLimit: 100000,
   billingDate: 15,
   currency: 'Rs.',
+  currencyFormat: 'en-LK',
   categories: [
     { id: 'groceries', name: 'Groceries', icon: 'ShoppingCart', color: 'bg-green-500' },
     { id: 'dining', name: 'Dining', icon: 'Utensils', color: 'bg-orange-500' },
@@ -55,12 +56,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
 
           if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const settings = userData.settings;
+
+            // Migration: Add currencyFormat if it doesn't exist
+            if (!settings.currencyFormat) {
+              settings.currencyFormat = 'en-LK';
+              await setDoc(doc(db, 'users', firebaseUser.uid), {
+                ...userData,
+                settings,
+              }, { merge: true });
+            }
+
             setUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email || '',
               displayName: firebaseUser.displayName || '',
               photoURL: firebaseUser.photoURL || '',
-              settings: userDoc.data().settings,
+              settings,
             });
           } else {
             // First time user - create document with defaults

@@ -45,7 +45,12 @@ export default function CyclesPage() {
       {currentCycle && currentCycle.expenseCount > 0 && (
         <div>
           <h2 className="text-lg font-semibold mb-3">Current Cycle</h2>
-          <CycleCard summary={currentCycle} currency={currency} showDetails />
+          <CycleCard
+            summary={currentCycle}
+            currency={currency}
+            currencyFormat={user?.settings.currencyFormat as any}
+            showDetails
+          />
         </div>
       )}
 
@@ -67,6 +72,7 @@ export default function CyclesPage() {
                 key={summary.cycleId}
                 summary={summary}
                 currency={currency}
+                currencyFormat={user?.settings.currencyFormat as any}
                 showDetails
               />
             ))}

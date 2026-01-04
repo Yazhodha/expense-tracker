@@ -9,7 +9,8 @@ export interface User {
 export interface UserSettings {
   monthlyLimit: number;      // Default: 100000
   billingDate: number;       // Default: 15 (day of month)
-  currency: string;          // Default: "Rs."
+  currency: string;          // Currency symbol: "Rs.", "$", "₹", etc.
+  currencyFormat: 'en-US' | 'en-IN' | 'en-GB' | 'en-EU' | 'en-LK'; // Default: 'en-LK'
   categories: Category[];
   notificationsEnabled: boolean;
   alertThresholds: number[]; // Default: [50, 75, 90, 100]
