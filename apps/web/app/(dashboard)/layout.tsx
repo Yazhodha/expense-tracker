@@ -34,7 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b pt-safe-top">
         <div className="flex items-center justify-between px-4 h-14 max-w-md mx-auto">
           <h1 className="font-bold text-lg">SpendWise</h1>
 

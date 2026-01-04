@@ -9,6 +9,7 @@ import { useCurrency } from '@/lib/hooks/useCurrency';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Calendar, PieChart } from 'lucide-react';
 import * as Icons from 'lucide-react';
+import { getCategoryColorById } from '@/lib/utils/categoryColors';
 
 export default function InsightsPage() {
   const { user } = useAuth();
@@ -19,12 +20,19 @@ export default function InsightsPage() {
   const categoryBreakdown = useMemo(() => {
     if (!user) return [];
 
-    const breakdown = new Map<string, { name: string; icon: string; total: number; count: number }>();
+    const breakdown = new Map<string, { id: string; name: string; icon: string; color: string; total: number; count: number }>();
 
     expenses.forEach((expense) => {
       const category = user.settings.categories.find(c => c.id === expense.category);
       if (category) {
-        const existing = breakdown.get(category.id) || { name: category.name, icon: category.icon, total: 0, count: 0 };
+        const existing = breakdown.get(category.id) || {
+          id: category.id,
+          name: category.name,
+          icon: category.icon,
+          color: getCategoryColorById(category.id, user.settings.categories),
+          total: 0,
+          count: 0
+        };
         breakdown.set(category.id, {
           ...existing,
           total: existing.total + expense.amount,
@@ -159,8 +167,8 @@ export default function InsightsPage() {
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-primary rounded-full transition-all"
-                      style={{ width: `${barWidth}%` }}
+                      className="h-full rounded-full transition-all"
+                      style={{ width: `${barWidth}%`, backgroundColor: category.color }}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">{category.count} transaction{category.count !== 1 ? 's' : ''}</p>

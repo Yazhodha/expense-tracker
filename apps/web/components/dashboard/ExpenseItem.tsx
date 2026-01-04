@@ -5,6 +5,7 @@ import { Expense, Category } from '@expense-tracker/shared-types';
 import { formatCurrency, CurrencyFormat } from '@expense-tracker/shared-utils';
 import { format } from 'date-fns';
 import * as Icons from 'lucide-react';
+import { getCategoryColorById } from '@/lib/utils/categoryColors';
 
 interface ExpenseItemProps {
   expense: Expense;
@@ -12,11 +13,17 @@ interface ExpenseItemProps {
   currency?: string;
   currencyFormat?: CurrencyFormat;
   onEdit?: (expense: Expense) => void;
+  categories?: Category[];
 }
 
-export function ExpenseItem({ expense, category, currency = 'Rs.', currencyFormat = 'en-LK', onEdit }: ExpenseItemProps) {
+export function ExpenseItem({ expense, category, currency = 'Rs.', currencyFormat = 'en-LK', onEdit, categories }: ExpenseItemProps) {
   // Dynamic icon component
   const IconComponent = (Icons as any)[category.icon] || Icons.Circle;
+
+  // Get color - if it's a hex color use it directly, otherwise get from utility
+  const categoryColor = category.color?.startsWith('#')
+    ? category.color
+    : (categories ? getCategoryColorById(category.id, categories) : '#3b82f6');
 
   return (
     <motion.div
@@ -26,7 +33,10 @@ export function ExpenseItem({ expense, category, currency = 'Rs.', currencyForma
       onClick={() => onEdit?.(expense)}
     >
       {/* Category icon */}
-      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${category.color}`}>
+      <div
+        className="w-10 h-10 rounded-full flex items-center justify-center"
+        style={{ backgroundColor: categoryColor }}
+      >
         <IconComponent className="w-5 h-5 text-white" />
       </div>
 

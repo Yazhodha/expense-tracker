@@ -56,6 +56,10 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      padding: {
+        safe: "env(safe-area-inset-bottom)",
+        "safe-top": "env(safe-area-inset-top)",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

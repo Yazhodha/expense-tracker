@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
-import { BudgetRing } from './BudgetRing';
-import { BudgetSummary } from '@expense-tracker/shared-types';
+import { CategoryPieChart } from './CategoryPieChart';
+import { BudgetSummary, Expense, Category } from '@expense-tracker/shared-types';
 import { formatCurrency, CurrencyFormat } from '@expense-tracker/shared-utils';
 import { format } from 'date-fns';
 
@@ -11,9 +11,17 @@ interface BudgetCardProps {
   summary: BudgetSummary;
   currency?: string;
   currencyFormat?: CurrencyFormat;
+  expenses?: Expense[];
+  categories?: Category[];
 }
 
-export function BudgetCard({ summary, currency = 'Rs.', currencyFormat = 'en-LK' }: BudgetCardProps) {
+export function BudgetCard({
+  summary,
+  currency = 'Rs.',
+  currencyFormat = 'en-LK',
+  expenses = [],
+  categories = []
+}: BudgetCardProps) {
   const { cycle, spent, limit, remaining, percentUsed, dailyBudget } = summary;
 
   return (
@@ -27,9 +35,16 @@ export function BudgetCard({ summary, currency = 'Rs.', currencyFormat = 'en-LK'
           <p className="text-sm text-muted-foreground">Current billing cycle</p>
         </div>
 
-        {/* Budget ring */}
+        {/* Category Pie Chart */}
         <div className="flex justify-center mb-6">
-          <BudgetRing percent={percentUsed} />
+          <CategoryPieChart
+            expenses={expenses}
+            categories={categories}
+            totalBudget={limit}
+            currency={currency}
+            currencyFormat={currencyFormat}
+            size={200}
+          />
         </div>
 
         {/* Amount details */}

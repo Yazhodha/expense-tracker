@@ -79,6 +79,7 @@ export function ExpenseList({ expenses, categories, currency, currencyFormat = '
                 currency={currency}
                 currencyFormat={currencyFormat}
                 onEdit={onEditExpense}
+                categories={categories}
               />
             ))}
           </div>

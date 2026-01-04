@@ -14,7 +14,7 @@ import { Expense } from '@expense-tracker/shared-types';
 import { Search, X } from 'lucide-react';
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, updateSettings } = useAuth();
   const { expenses, loading, summary, addExpense, updateExpense, deleteExpense } = useExpenses();
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,6 +36,37 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error adding expense:', error);
       toast.error('Failed to add expense. Please try again.');
+    }
+  };
+
+  const handleAddCategory = async (name: string, color: string) => {
+    if (!user) return;
+
+    try {
+      // Generate a unique ID for the category
+      const categoryId = name.toLowerCase().replace(/\s+/g, '-');
+
+      // Check if category already exists
+      if (user.settings.categories.find(c => c.id === categoryId)) {
+        toast.error('Category already exists');
+        return;
+      }
+
+      const newCategory = {
+        id: categoryId,
+        name,
+        icon: 'Circle',
+        color,
+      };
+
+      await updateSettings({
+        categories: [...user.settings.categories, newCategory],
+      });
+
+      toast.success(`Category "${name}" added successfully`);
+    } catch (error) {
+      console.error('Error adding category:', error);
+      toast.error('Failed to add category. Please try again.');
     }
   };
 
@@ -98,6 +129,8 @@ export default function DashboardPage() {
         summary={summary}
         currency={user.settings.currency}
         currencyFormat={user.settings.currencyFormat as any}
+        expenses={expenses}
+        categories={user.settings.categories}
       />
 
       {/* Search Bar */}
@@ -144,6 +177,7 @@ export default function DashboardPage() {
         categories={user.settings.categories}
         currency={user.settings.currency}
         onAdd={handleAddExpense}
+        onAddCategory={handleAddCategory}
       />
 
       {/* Edit Expense Sheet */}
