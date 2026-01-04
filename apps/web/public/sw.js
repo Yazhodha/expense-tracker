@@ -1,5 +1,5 @@
-const CACHE_NAME = 'spendwise-v1';
-const RUNTIME_CACHE = 'spendwise-runtime';
+const CACHE_NAME = 'spendwise-v2';
+const RUNTIME_CACHE = 'spendwise-runtime-v2';
 
 // Assets to cache on install
 const PRECACHE_URLS = [
@@ -88,6 +88,30 @@ self.addEventListener('fetch', (event) => {
             });
           });
         })
+    );
+  }
+});
+
+// Listen for messages from clients
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+
+  if (event.data && event.data.type === 'CLEAR_CACHE') {
+    event.waitUntil(
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => caches.delete(cacheName))
+        );
+      }).then(() => {
+        // Notify all clients that cache has been cleared
+        return self.clients.matchAll().then((clients) => {
+          clients.forEach((client) => {
+            client.postMessage({ type: 'CACHE_CLEARED' });
+          });
+        });
+      })
     );
   }
 });
