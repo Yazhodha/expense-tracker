@@ -8,8 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { useExpenses } from '@/lib/hooks/useExpenses';
 import { formatCurrency, CURRENCY_FORMATS, CurrencyFormat } from '@expense-tracker/shared-utils';
-import { SaveIcon, RefreshCw, Trash2 } from 'lucide-react';
+import { SaveIcon, RefreshCw, Trash2, AlertTriangle } from 'lucide-react';
+import * as Icons from 'lucide-react';
+import { toast } from 'sonner';
 import {
   Select,
   SelectContent,
@@ -18,8 +21,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+// Default category IDs that cannot be deleted
+const DEFAULT_CATEGORY_IDS = [
+  'groceries', 'dining', 'fuel', 'shopping', 'subscriptions',
+  'health', 'entertainment', 'transport', 'utilities', 'other'
+];
+
 export default function SettingsPage() {
   const { user, updateSettings } = useAuth();
+  const { expenses, updateExpense } = useExpenses();
   const [monthlyLimit, setMonthlyLimit] = useState(String(user?.settings.monthlyLimit || 100000));
   const [billingDate, setBillingDate] = useState(String(user?.settings.billingDate || 15));
   const [currencyFormat, setCurrencyFormat] = useState<CurrencyFormat>(
@@ -29,6 +39,7 @@ export default function SettingsPage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [clearingCache, setClearingCache] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [deletingCategory, setDeletingCategory] = useState<string | null>(null);
 
   useEffect(() => {
     // Check for service worker updates
@@ -112,6 +123,52 @@ export default function SettingsPage() {
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
         window.location.reload();
       }
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    if (!user) return;
+
+    // Prevent deleting default categories
+    if (DEFAULT_CATEGORY_IDS.includes(categoryId)) {
+      toast.error('Cannot delete default categories');
+      return;
+    }
+
+    // Count expenses using this category
+    const affectedExpenses = expenses.filter(e => e.category === categoryId);
+    const expenseCount = affectedExpenses.length;
+
+    // Confirm deletion
+    const message = expenseCount > 0
+      ? `This will delete the category and move ${expenseCount} expense${expenseCount > 1 ? 's' : ''} to "Other". Continue?`
+      : 'Are you sure you want to delete this category?';
+
+    if (!confirm(message)) {
+      return;
+    }
+
+    setDeletingCategory(categoryId);
+    try {
+      // Reassign all expenses to "other" category
+      if (expenseCount > 0) {
+        await Promise.all(
+          affectedExpenses.map(expense =>
+            updateExpense(expense.id, { category: 'other' })
+          )
+        );
+      }
+
+      // Remove category from user settings
+      const updatedCategories = user.settings.categories.filter(c => c.id !== categoryId);
+      await updateSettings({ categories: updatedCategories });
+
+      toast.success(`Category deleted${expenseCount > 0 ? ` and ${expenseCount} expense${expenseCount > 1 ? 's' : ''} moved to Other` : ''}`);
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      toast.error('Failed to delete category. Please try again.');
+    } finally {
+      setDeletingCategory(null);
     }
   };
 
@@ -232,6 +289,64 @@ export default function SettingsPage() {
             <SaveIcon className="mr-2 h-4 w-4" />
             {saving ? 'Saving...' : 'Save Changes'}
           </Button>
+        </CardContent>
+      </Card>
+
+      {/* Category Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Manage Categories</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground mb-4">
+            Custom categories can be deleted. Expenses will be moved to "Other".
+          </p>
+
+          {user.settings.categories.map((category) => {
+            const IconComponent = (Icons as any)[category.icon] || Icons.Circle;
+            const isDefault = DEFAULT_CATEGORY_IDS.includes(category.id);
+            const isDeleting = deletingCategory === category.id;
+            const expenseCount = expenses.filter(e => e.category === category.id).length;
+
+            return (
+              <div
+                key={category.id}
+                className="flex items-center justify-between p-3 rounded-lg border bg-card"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: category.color }}
+                  >
+                    <IconComponent className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{category.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {expenseCount} expense{expenseCount !== 1 ? 's' : ''}
+                      {isDefault && ' • Default category'}
+                    </p>
+                  </div>
+                </div>
+
+                {!isDefault && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteCategory(category.id)}
+                    disabled={isDeleting}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    {isDeleting ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-destructive" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
+              </div>
+            );
+          })}
         </CardContent>
       </Card>
 
