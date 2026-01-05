@@ -10,7 +10,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useExpenses } from '@/lib/hooks/useExpenses';
 import { formatCurrency, CURRENCY_FORMATS, CurrencyFormat } from '@expense-tracker/shared-utils';
-import { SaveIcon, RefreshCw, Trash2, AlertTriangle } from 'lucide-react';
+import { SaveIcon, RefreshCw, Trash2, ChevronDown } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -20,6 +20,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
 
 // Default category IDs that cannot be deleted
 const DEFAULT_CATEGORY_IDS = [
@@ -39,7 +51,9 @@ export default function SettingsPage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [clearingCache, setClearingCache] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
-  const [deletingCategory, setDeletingCategory] = useState<string | null>(null);
+  const [selectedCategoriesToDelete, setSelectedCategoriesToDelete] = useState<string[]>([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     // Check for service worker updates
@@ -126,30 +140,15 @@ export default function SettingsPage() {
     }
   };
 
-  const handleDeleteCategory = async (categoryId: string) => {
-    if (!user) return;
+  const handleDeleteCategories = async () => {
+    if (!user || selectedCategoriesToDelete.length === 0) return;
 
-    // Prevent deleting default categories
-    if (DEFAULT_CATEGORY_IDS.includes(categoryId)) {
-      toast.error('Cannot delete default categories');
-      return;
-    }
-
-    // Count expenses using this category
-    const affectedExpenses = expenses.filter(e => e.category === categoryId);
-    const expenseCount = affectedExpenses.length;
-
-    // Confirm deletion
-    const message = expenseCount > 0
-      ? `This will delete the category and move ${expenseCount} expense${expenseCount > 1 ? 's' : ''} to "Other". Continue?`
-      : 'Are you sure you want to delete this category?';
-
-    if (!confirm(message)) {
-      return;
-    }
-
-    setDeletingCategory(categoryId);
+    setDeleting(true);
     try {
+      // Count total affected expenses
+      const affectedExpenses = expenses.filter(e => selectedCategoriesToDelete.includes(e.category));
+      const expenseCount = affectedExpenses.length;
+
       // Reassign all expenses to "other" category
       if (expenseCount > 0) {
         await Promise.all(
@@ -159,18 +158,39 @@ export default function SettingsPage() {
         );
       }
 
-      // Remove category from user settings
-      const updatedCategories = user.settings.categories.filter(c => c.id !== categoryId);
+      // Remove categories from user settings
+      const updatedCategories = user.settings.categories.filter(
+        c => !selectedCategoriesToDelete.includes(c.id)
+      );
       await updateSettings({ categories: updatedCategories });
 
-      toast.success(`Category deleted${expenseCount > 0 ? ` and ${expenseCount} expense${expenseCount > 1 ? 's' : ''} moved to Other` : ''}`);
+      const categoryCount = selectedCategoriesToDelete.length;
+      toast.success(
+        `${categoryCount} categor${categoryCount > 1 ? 'ies' : 'y'} deleted${
+          expenseCount > 0 ? ` and ${expenseCount} expense${expenseCount > 1 ? 's' : ''} moved to Other` : ''
+        }`
+      );
+
+      // Reset selection
+      setSelectedCategoriesToDelete([]);
+      setShowDeleteDialog(false);
     } catch (error) {
-      console.error('Error deleting category:', error);
-      toast.error('Failed to delete category. Please try again.');
+      console.error('Error deleting categories:', error);
+      toast.error('Failed to delete categories. Please try again.');
     } finally {
-      setDeletingCategory(null);
+      setDeleting(false);
     }
   };
+
+  // Get custom categories (non-default)
+  const customCategories = user?.settings.categories.filter(
+    c => !DEFAULT_CATEGORY_IDS.includes(c.id)
+  ) || [];
+
+  // Calculate total expenses that will be affected
+  const affectedExpenseCount = expenses.filter(
+    e => selectedCategoriesToDelete.includes(e.category)
+  ).length;
 
   if (!user) return null;
 
@@ -295,60 +315,129 @@ export default function SettingsPage() {
       {/* Category Management */}
       <Card>
         <CardHeader>
-          <CardTitle>Manage Categories</CardTitle>
+          <CardTitle>Delete Custom Categories</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground mb-4">
-            Custom categories can be deleted. Expenses will be moved to "Other".
-          </p>
+        <CardContent className="space-y-4">
+          {customCategories.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No custom categories yet. Add categories when creating expenses.
+            </p>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Select custom categories to delete. Affected expenses will be moved to "Other".
+              </p>
 
-          {user.settings.categories.map((category) => {
-            const IconComponent = (Icons as any)[category.icon] || Icons.Circle;
-            const isDefault = DEFAULT_CATEGORY_IDS.includes(category.id);
-            const isDeleting = deletingCategory === category.id;
-            const expenseCount = expenses.filter(e => e.category === category.id).length;
-
-            return (
-              <div
-                key={category.id}
-                className="flex items-center justify-between p-3 rounded-lg border bg-card"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: category.color }}
-                  >
-                    <IconComponent className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{category.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {expenseCount} expense{expenseCount !== 1 ? 's' : ''}
-                      {isDefault && ' • Default category'}
-                    </p>
-                  </div>
-                </div>
-
-                {!isDefault && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteCategory(category.id)}
-                    disabled={isDeleting}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    {isDeleting ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-destructive" />
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
+              {/* Category Selection Popover */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    <span>
+                      {selectedCategoriesToDelete.length === 0
+                        ? 'Select categories...'
+                        : `${selectedCategoriesToDelete.length} selected`}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50" />
                   </Button>
-                )}
-              </div>
-            );
-          })}
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0" align="start">
+                  <div className="p-4 space-y-2 max-h-[300px] overflow-y-auto">
+                    {customCategories.map((category) => {
+                      const IconComponent = (Icons as any)[category.icon] || Icons.Circle;
+                      const expenseCount = expenses.filter(e => e.category === category.id).length;
+                      const isSelected = selectedCategoriesToDelete.includes(category.id);
+
+                      return (
+                        <div
+                          key={category.id}
+                          className="flex items-center space-x-3 p-2 rounded-md hover:bg-accent cursor-pointer"
+                          onClick={() => {
+                            setSelectedCategoriesToDelete(prev =>
+                              isSelected
+                                ? prev.filter(id => id !== category.id)
+                                : [...prev, category.id]
+                            );
+                          }}
+                        >
+                          <Checkbox checked={isSelected} />
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                            style={{ backgroundColor: category.color }}
+                          >
+                            <IconComponent className="w-4 h-4 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{category.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {expenseCount} expense{expenseCount !== 1 ? 's' : ''}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              {/* Delete Button */}
+              {selectedCategoriesToDelete.length > 0 && (
+                <Button
+                  variant="destructive"
+                  className="w-full"
+                  onClick={() => setShowDeleteDialog(true)}
+                  disabled={deleting}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete {selectedCategoriesToDelete.length} categor
+                  {selectedCategoriesToDelete.length > 1 ? 'ies' : 'y'}
+                </Button>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Categories</AlertDialogTitle>
+            <AlertDialogDescription>
+              {affectedExpenseCount > 0 ? (
+                <>
+                  This will delete {selectedCategoriesToDelete.length} categor
+                  {selectedCategoriesToDelete.length > 1 ? 'ies' : 'y'} and move{' '}
+                  {affectedExpenseCount} expense{affectedExpenseCount > 1 ? 's' : ''} to "Other".
+                  This action cannot be undone.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to delete {selectedCategoriesToDelete.length} categor
+                  {selectedCategoriesToDelete.length > 1 ? 'ies' : 'y'}? This action cannot be
+                  undone.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteCategories}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* App Data & Cache */}
       <Card>
