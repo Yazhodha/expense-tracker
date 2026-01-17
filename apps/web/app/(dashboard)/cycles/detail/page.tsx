@@ -154,7 +154,11 @@ export default function CycleDetailPage() {
           ) : (
             <div className="space-y-4">
               {categoryBreakdown.map((cat) => (
-                <div key={cat.categoryId}>
+                <Link
+                  key={cat.categoryId}
+                  href={`/cycles/category-expenses?cycleId=${cycleId}&categoryId=${cat.categoryId}&categoryName=${encodeURIComponent(cat.categoryName)}&startDate=${cycle.startDate.toISOString()}&endDate=${cycle.endDate.toISOString()}`}
+                  className="block hover:bg-accent/50 -mx-2 px-2 py-2 rounded-md transition-colors cursor-pointer"
+                >
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-medium">{cat.categoryName}</span>
                     <span className="text-sm font-semibold">
@@ -175,7 +179,7 @@ export default function CycleDetailPage() {
                   <p className="text-xs text-muted-foreground mt-1">
                     {cat.expenseCount} transaction{cat.expenseCount !== 1 ? 's' : ''}
                   </p>
-                </div>
+                </Link>
               ))}
             </div>
           )}

@@ -51,7 +51,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </ThemeProvider>
         </AuthProvider>
-        <Toaster position="top-center" richColors />
+        <Toaster
+          position="top-center"
+          richColors
+          duration={3000}
+          toastOptions={{
+            style: {
+              marginTop: 'calc(env(safe-area-inset-top, 0px) + 60px)',
+            },
+          }}
+        />
       </body>
     </html>
   );

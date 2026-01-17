@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Calendar, PieChart } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { getCategoryColorById } from '@/lib/utils/categoryColors';
+import Link from 'next/link';
+import { getBillingCycle } from '@expense-tracker/shared-utils';
 
 export default function InsightsPage() {
   const { user } = useAuth();
@@ -107,6 +109,8 @@ export default function InsightsPage() {
   }
 
   const maxCategoryAmount = categoryBreakdown[0]?.total || 1;
+  const currentCycle = getBillingCycle(user.settings.billingDate);
+  const cycleId = `${format(currentCycle.startDate, 'yyyy-MM-dd')}`;
 
   return (
     <motion.div
@@ -154,7 +158,11 @@ export default function InsightsPage() {
               const barWidth = (category.total / maxCategoryAmount) * 100;
 
               return (
-                <div key={category.name} className="space-y-2">
+                <Link
+                  key={category.name}
+                  href={`/cycles/category-expenses?cycleId=${cycleId}&categoryId=${category.id}&categoryName=${encodeURIComponent(category.name)}&startDate=${currentCycle.startDate.toISOString()}&endDate=${currentCycle.endDate.toISOString()}`}
+                  className="block space-y-2 hover:bg-accent/50 -mx-2 px-2 py-2 rounded-md transition-colors cursor-pointer"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <IconComponent className="w-4 h-4" />
@@ -172,7 +180,7 @@ export default function InsightsPage() {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">{category.count} transaction{category.count !== 1 ? 's' : ''}</p>
-                </div>
+                </Link>
               );
             })
           )}
