@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useCycleHistory } from '@expense-tracker/shared-hooks';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -23,13 +23,31 @@ export default function ComparePage() {
   const allCycles = currentCycle ? [currentCycle, ...cycleSummaries] : cycleSummaries;
   const cyclesWithExpenses = allCycles.filter((c) => c.expenseCount > 0);
 
-  // Get initial cycle IDs from URL params or default to current vs last
-  const initialCycle1 = searchParams.get('cycle1') || cyclesWithExpenses[0]?.cycleId || '';
-  const initialCycle2 = searchParams.get('cycle2') || cyclesWithExpenses[1]?.cycleId || '';
-
-  const [selectedCycle1, setSelectedCycle1] = useState(initialCycle1);
-  const [selectedCycle2, setSelectedCycle2] = useState(initialCycle2);
+  const [selectedCycle1, setSelectedCycle1] = useState('');
+  const [selectedCycle2, setSelectedCycle2] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  // Initialize selected cycles when data loads
+  useEffect(() => {
+    if (cyclesWithExpenses.length >= 2 && !selectedCycle1 && !selectedCycle2) {
+      // Get initial cycle IDs from URL params or default to current vs last
+      const cycle1 = searchParams.get('cycle1') || cyclesWithExpenses[0]?.cycleId || '';
+      const cycle2 = searchParams.get('cycle2') || cyclesWithExpenses[1]?.cycleId || '';
+
+      setSelectedCycle1(cycle1);
+      setSelectedCycle2(cycle2);
+    }
+  }, [cyclesWithExpenses, selectedCycle1, selectedCycle2, searchParams]);
+
+  // Ensure cycle2 is different from cycle1
+  useEffect(() => {
+    if (selectedCycle1 && selectedCycle2 === selectedCycle1) {
+      const availableCycle = cyclesWithExpenses.find((c) => c.cycleId !== selectedCycle1);
+      if (availableCycle) {
+        setSelectedCycle2(availableCycle.cycleId);
+      }
+    }
+  }, [selectedCycle1, selectedCycle2, cyclesWithExpenses]);
 
   const cycle1Summary = allCycles.find((c) => c.cycleId === selectedCycle1);
   const cycle2Summary = allCycles.find((c) => c.cycleId === selectedCycle2);

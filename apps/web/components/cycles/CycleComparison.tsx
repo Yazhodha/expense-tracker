@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CycleComparison as CycleComparisonType, CategoryComparison } from '@expense-tracker/shared-types';
 import { formatCurrency } from '@expense-tracker/shared-utils';
 import { format } from 'date-fns';
-import { TrendingDown, TrendingUp, Minus, ArrowRight } from 'lucide-react';
+import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface CycleComparisonProps {
@@ -56,37 +56,39 @@ export function CycleComparison({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-center flex-1">
-              <p className="text-sm text-muted-foreground mb-1">
-                {format(cycle1.cycle.startDate, 'MMM d')} - {format(cycle1.cycle.endDate, 'MMM d, yyyy')}
-              </p>
-              <p className="text-2xl font-bold">{formatCurrency(cycle1.totalSpent, currency)}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {cycle1.percentUsed.toFixed(1)}% of budget
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center px-4">
-              <ArrowRight className="h-6 w-6 text-muted-foreground" />
-              <div className="text-center mt-2">
-                <p className={`text-sm font-semibold ${totalSpentDiff > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                  {totalSpentDiff > 0 ? '+' : ''}{formatCurrency(totalSpentDiff, currency)}
+          <div className="space-y-4 mb-4">
+            {/* Cycle amounts */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-2">
+                  {format(cycle1.cycle.startDate, 'MMM d')} - {format(cycle1.cycle.endDate, 'MMM d')}
                 </p>
-                <p className={`text-xs ${totalSpentDiffPercent > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                  {totalSpentDiffPercent > 0 ? '+' : ''}{totalSpentDiffPercent.toFixed(1)}%
+                <p className="text-xl sm:text-2xl font-bold break-words">{formatCurrency(cycle1.totalSpent, currency)}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {cycle1.percentUsed.toFixed(1)}% of budget
+                </p>
+              </div>
+
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-2">
+                  {format(cycle2.cycle.startDate, 'MMM d')} - {format(cycle2.cycle.endDate, 'MMM d')}
+                </p>
+                <p className="text-xl sm:text-2xl font-bold break-words">{formatCurrency(cycle2.totalSpent, currency)}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {cycle2.percentUsed.toFixed(1)}% of budget
                 </p>
               </div>
             </div>
 
-            <div className="text-center flex-1">
-              <p className="text-sm text-muted-foreground mb-1">
-                {format(cycle2.cycle.startDate, 'MMM d')} - {format(cycle2.cycle.endDate, 'MMM d, yyyy')}
-              </p>
-              <p className="text-2xl font-bold">{formatCurrency(cycle2.totalSpent, currency)}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {cycle2.percentUsed.toFixed(1)}% of budget
-              </p>
+            {/* Difference indicator */}
+            <div className="flex items-center justify-center gap-2 py-2 px-3 bg-muted/50 rounded-lg">
+              <span className="text-xs text-muted-foreground">Difference:</span>
+              <span className={`text-sm font-semibold ${totalSpentDiff > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                {totalSpentDiff > 0 ? '+' : ''}{formatCurrency(totalSpentDiff, currency)}
+              </span>
+              <span className={`text-xs ${totalSpentDiffPercent > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                ({totalSpentDiffPercent > 0 ? '+' : ''}{totalSpentDiffPercent.toFixed(1)}%)
+              </span>
             </div>
           </div>
 
@@ -193,74 +195,88 @@ export function CycleComparison({
         <CardContent>
           <div className="space-y-4">
             {/* Avg Daily Spending */}
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div>
-                <p className="text-sm font-medium">Average Daily Spending</p>
-                <div className="flex items-center gap-4 mt-1">
-                  <span className="text-lg font-semibold">
+            <div className="p-3 bg-muted/50 rounded-lg space-y-3">
+              <p className="text-sm font-medium">Average Daily Spending</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="text-center">
+                  <span className="text-base sm:text-lg font-semibold break-words block">
                     {formatCurrency(metrics.avgDailySpending.cycle1, currency)}
                   </span>
-                  <span className="text-xs text-muted-foreground">vs</span>
-                  <span className="text-lg font-semibold text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">Current</span>
+                </div>
+                <div className="text-center">
+                  <span className="text-base sm:text-lg font-semibold text-muted-foreground break-words block">
                     {formatCurrency(metrics.avgDailySpending.cycle2, currency)}
                   </span>
+                  <span className="text-xs text-muted-foreground">Previous</span>
                 </div>
               </div>
-              <div className="text-right">
-                <p className={`text-sm font-semibold ${metrics.avgDailySpending.difference > 0 ? 'text-red-500' : 'text-green-500'}`}>
+              <div className="flex items-center justify-center gap-2 pt-2 border-t">
+                <span className="text-xs text-muted-foreground">Difference:</span>
+                <span className={`text-sm font-semibold ${metrics.avgDailySpending.difference > 0 ? 'text-red-500' : 'text-green-500'}`}>
                   {metrics.avgDailySpending.difference > 0 ? '+' : ''}
                   {formatCurrency(metrics.avgDailySpending.difference, currency)}
-                </p>
-                <p className={`text-xs ${metrics.avgDailySpending.percentChange > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                  {metrics.avgDailySpending.percentChange > 0 ? '+' : ''}
-                  {metrics.avgDailySpending.percentChange.toFixed(1)}%
-                </p>
+                </span>
+                <span className={`text-xs ${metrics.avgDailySpending.percentChange > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                  ({metrics.avgDailySpending.percentChange > 0 ? '+' : ''}
+                  {metrics.avgDailySpending.percentChange.toFixed(1)}%)
+                </span>
               </div>
             </div>
 
             {/* Largest Expense */}
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div>
-                <p className="text-sm font-medium">Largest Single Expense</p>
-                <div className="flex items-center gap-4 mt-1">
-                  <span className="text-lg font-semibold">
+            <div className="p-3 bg-muted/50 rounded-lg space-y-3">
+              <p className="text-sm font-medium">Largest Single Expense</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="text-center">
+                  <span className="text-base sm:text-lg font-semibold break-words block">
                     {formatCurrency(metrics.largestExpense.cycle1, currency)}
                   </span>
-                  <span className="text-xs text-muted-foreground">vs</span>
-                  <span className="text-lg font-semibold text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">Current</span>
+                </div>
+                <div className="text-center">
+                  <span className="text-base sm:text-lg font-semibold text-muted-foreground break-words block">
                     {formatCurrency(metrics.largestExpense.cycle2, currency)}
                   </span>
+                  <span className="text-xs text-muted-foreground">Previous</span>
                 </div>
               </div>
-              <div className="text-right">
-                <p className={`text-sm font-semibold ${metrics.largestExpense.difference > 0 ? 'text-red-500' : 'text-green-500'}`}>
+              <div className="flex items-center justify-center gap-2 pt-2 border-t">
+                <span className="text-xs text-muted-foreground">Difference:</span>
+                <span className={`text-sm font-semibold ${metrics.largestExpense.difference > 0 ? 'text-red-500' : 'text-green-500'}`}>
                   {metrics.largestExpense.difference > 0 ? '+' : ''}
                   {formatCurrency(metrics.largestExpense.difference, currency)}
-                </p>
+                </span>
               </div>
             </div>
 
             {/* Transaction Count */}
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div>
-                <p className="text-sm font-medium">Number of Transactions</p>
-                <div className="flex items-center gap-4 mt-1">
-                  <span className="text-lg font-semibold">{metrics.expenseCount.cycle1}</span>
-                  <span className="text-xs text-muted-foreground">vs</span>
-                  <span className="text-lg font-semibold text-muted-foreground">
+            <div className="p-3 bg-muted/50 rounded-lg space-y-3">
+              <p className="text-sm font-medium">Number of Transactions</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="text-center">
+                  <span className="text-base sm:text-lg font-semibold block">
+                    {metrics.expenseCount.cycle1}
+                  </span>
+                  <span className="text-xs text-muted-foreground">Current</span>
+                </div>
+                <div className="text-center">
+                  <span className="text-base sm:text-lg font-semibold text-muted-foreground block">
                     {metrics.expenseCount.cycle2}
                   </span>
+                  <span className="text-xs text-muted-foreground">Previous</span>
                 </div>
               </div>
-              <div className="text-right">
-                <p className={`text-sm font-semibold ${metrics.expenseCount.difference > 0 ? 'text-orange-500' : 'text-blue-500'}`}>
+              <div className="flex items-center justify-center gap-2 pt-2 border-t">
+                <span className="text-xs text-muted-foreground">Difference:</span>
+                <span className={`text-sm font-semibold ${metrics.expenseCount.difference > 0 ? 'text-orange-500' : 'text-blue-500'}`}>
                   {metrics.expenseCount.difference > 0 ? '+' : ''}
                   {metrics.expenseCount.difference}
-                </p>
-                <p className={`text-xs ${metrics.expenseCount.percentChange > 0 ? 'text-orange-500' : 'text-blue-500'}`}>
-                  {metrics.expenseCount.percentChange > 0 ? '+' : ''}
-                  {metrics.expenseCount.percentChange.toFixed(1)}%
-                </p>
+                </span>
+                <span className={`text-xs ${metrics.expenseCount.percentChange > 0 ? 'text-orange-500' : 'text-blue-500'}`}>
+                  ({metrics.expenseCount.percentChange > 0 ? '+' : ''}
+                  {metrics.expenseCount.percentChange.toFixed(1)}%)
+                </span>
               </div>
             </div>
           </div>
