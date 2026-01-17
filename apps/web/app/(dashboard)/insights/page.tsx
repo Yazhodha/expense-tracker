@@ -124,7 +124,7 @@ export default function InsightsPage() {
       <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
               <Calendar className="w-4 h-4" />
               <p className="text-sm">Avg Daily</p>
             </div>
@@ -134,7 +134,7 @@ export default function InsightsPage() {
 
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
               <PieChart className="w-4 h-4" />
               <p className="text-sm">Total Expenses</p>
             </div>
@@ -169,7 +169,7 @@ export default function InsightsPage() {
                       <span className="text-sm font-medium">{category.name}</span>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-semibold">{formatCurrency(category.total)}</p>
+                      <p className="text-sm font-semibold break-words">{formatCurrency(category.total)}</p>
                       <p className="text-xs text-muted-foreground">{percentage.toFixed(1)}%</p>
                     </div>
                   </div>
@@ -205,7 +205,7 @@ export default function InsightsPage() {
                     <span className={isCurrentDay ? 'font-semibold' : 'text-muted-foreground'}>
                       {format(day.date, 'EEE, MMM d')}
                     </span>
-                    <span className="font-medium">{formatCurrency(day.total)}</span>
+                    <span className="font-medium break-words">{formatCurrency(day.total)}</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div
@@ -229,9 +229,9 @@ export default function InsightsPage() {
           {topMerchant.name === 'N/A' ? (
             <p className="text-muted-foreground text-sm">No merchant data available.</p>
           ) : (
-            <div className="flex items-center justify-between">
-              <p className="text-lg font-semibold">{topMerchant.name}</p>
-              <p className="text-xl font-bold text-primary">{formatCurrency(topMerchant.total)}</p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-base sm:text-lg font-semibold truncate">{topMerchant.name}</p>
+              <p className="text-lg sm:text-xl font-bold text-primary break-words text-right">{formatCurrency(topMerchant.total)}</p>
             </div>
           )}
         </CardContent>
@@ -268,7 +268,7 @@ export default function InsightsPage() {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Recommended Daily Budget</span>
-              <span className="font-medium">{formatCurrency(summary.dailyBudget)}</span>
+              <span className="font-medium break-words text-right">{formatCurrency(summary.dailyBudget)}</span>
             </div>
           </div>
         </CardContent>

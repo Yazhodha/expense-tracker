@@ -54,6 +54,7 @@ export default function SettingsPage() {
   const [selectedCategoriesToDelete, setSelectedCategoriesToDelete] = useState<string[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false);
 
   useEffect(() => {
     // Check for service worker updates
@@ -107,10 +108,6 @@ export default function SettingsPage() {
   };
 
   const handleClearCache = async () => {
-    if (!confirm('This will clear all cached data and reload the app. Continue?')) {
-      return;
-    }
-
     setClearingCache(true);
     try {
       if ('serviceWorker' in navigator) {
@@ -126,7 +123,9 @@ export default function SettingsPage() {
     } catch (error) {
       console.error('Error clearing cache:', error);
       setClearingCache(false);
-      alert('Failed to clear cache. Please try again.');
+      toast.error('Failed to clear cache. Please try again.');
+    } finally {
+      setShowClearCacheDialog(false);
     }
   };
 
@@ -439,6 +438,35 @@ export default function SettingsPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Clear Cache Confirmation Dialog */}
+      <AlertDialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear Cache & Reload</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will clear all cached data and reload the app. Any unsaved changes will be lost. Continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={clearingCache}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClearCache}
+              disabled={clearingCache}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {clearingCache ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  Clearing...
+                </>
+              ) : (
+                'Clear Cache'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* App Data & Cache */}
       <Card>
         <CardHeader>
@@ -451,7 +479,7 @@ export default function SettingsPage() {
               Clear all cached data and reload the app. Use this if you're experiencing issues or not seeing updates.
             </p>
             <Button
-              onClick={handleClearCache}
+              onClick={() => setShowClearCacheDialog(true)}
               disabled={clearingCache}
               variant="destructive"
               className="w-full"
